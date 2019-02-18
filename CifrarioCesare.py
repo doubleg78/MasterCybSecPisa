@@ -1,8 +1,13 @@
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
 
 def crypt_text():
-    text_to_crypt = raw_input("Digita un testo: ").upper()
-    shift_crypt = int(raw_input("Digita valore avanzamento: "))
+    alphabet_option = "0"
+    while alphabet_option not in ["1", "2", ""]:
+        alphabet_option = raw_input("Do you want to use standard 26 Alphabet (ABCDEFGHIJKLMNOPQRSTUVWYZ) ? \n[1] Yes\n[2] No\nor press Enter for standard\n")
+    if alphabet_option == 2:
+        alphabet = raw_input("Please type your Alphabet: \n")
+    text_to_crypt = raw_input("Type the text to be encrypted: ").upper()
+    shift_crypt = int(raw_input("Type the shift value: "))
 
     #while (len(alphabet) + shift_crypt) > len(alphabet): #option 1
     #    shift_crypt -= len(alphabet)
