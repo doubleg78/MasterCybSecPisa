@@ -1,15 +1,20 @@
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
 
-testo_da_cryptare = raw_input("Digita un testo: ").upper()
+text_to_crypt = raw_input("Digita un testo: ").upper()
+shift_crypt = int(raw_input("Digita valore avanzamento: "))
 
-lunghezza_testo = len(testo_da_cryptare)
+#while (len(alphabet) + shift_crypt) > len(alphabet): #option 1
+#    shift_crypt -= len(alphabet)
 
-testo_cryptato = ""
+text_length = len(text_to_crypt)
 
-for i in range(lunghezza_testo):
-    location_char = alphabet.find(testo_da_cryptare[i])
-    new_location_char = location_char + 3
-    testo_cryptato += alphabet[new_location_char]
+text_crypted = ""
 
-print("Testo cryptato: %s") %testo_cryptato
+for i in range(text_length):
+    location_char = alphabet.find(text_to_crypt[i])
+    new_location_char = (location_char + shift_crypt) %len(alphabet) #option 2
+    #new_location_char = (location_char + shift_crypt) #option 1
+    text_crypted += alphabet[new_location_char]
+
+print("Testo cryptato: %s") %text_crypted
 
