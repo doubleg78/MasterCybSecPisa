@@ -24,7 +24,24 @@ def crypt_text():
 
 
 def uncrypt_text():
-    print()
+    alphabet_option = "0"
+    while alphabet_option not in ["1", "2", ""]:
+        alphabet_option = raw_input("Do you want to use standard 26 Alphabet (ABCDEFGHIJKLMNOPQRSTUVWYZ) ? \n[1] Yes\n[2] No\nor press Enter for standard\n")
+    if alphabet_option == "1":
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
+    else:
+        alphabet = raw_input("Please type your Alphabet: \n")
+    text_to_decrypt = raw_input("Type the text to be decrypted: ").upper()
+    shift_decrypt = int(raw_input("Type the shift value: "))
+
+    text_length = len(text_to_decrypt)
+    text_decrypted = ""
+
+    for i in range(text_length):
+        location_char = alphabet.find(text_to_decrypt[i])
+        new_location_char = (location_char - shift_decrypt) %len(alphabet) #option 2
+        text_decrypted += alphabet[new_location_char]
+    return text_decrypted  
 
 def menu():
     print "Welcome to CEASER Crypt Module"
