@@ -1,6 +1,8 @@
 import socket
 import sys
 import time
+import threading
+import asciiart
 
 
 def msgserver(sHost, sPort, msg):
@@ -10,8 +12,10 @@ def msgserver(sHost, sPort, msg):
         sys.exit('Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1])
 
     print 'MSGSERVER: Socket Created'
-
-    s.connect((sHost, sPort))
+    try:
+        s.connect((sHost, sPort))
+    except:
+        sys.exit('Server OFFLINE. Exiting')
 
     print 'MSGSERVER: Socket Connected to server ' + sHost + ' on port ' + str(sPort)
 
@@ -31,11 +35,36 @@ def msgserver(sHost, sPort, msg):
     s.close()
 
 
+def udpServer(usHost, usPort):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((usHost, usPort))
+    t1 = threading.Thread(target=udpServerMessage, args=(sock,))
+    t1.start()
+
+
+def udpServerMessage(sock):
+    while True:
+        data, addr = sock.recvfrom(1024)
+        if data == 'PING?PONG':
+            sock.sendto('PONG?PING', (addr[0], addr[1]))
+        print 'Received message: ', data
 
 
 server_host = '127.0.0.1'
 server_port = 8888
-print('Welcome to SuperChat Server\r\nNow registering the client with the server...\r\n')
+print('Welcome to SuperChat Server\r\nStage 1: Now registering the client with the server...\r\n')
 #message = 'REGISTER|' + sys.argv[1] + '|' + sys.argv[2] + '|' + sys.argv[3]
-message = 'REGISTER|doubleG|127.0.0.1|8880'
+message = 'REGISTER|doubleG|127.0.0.1|7777'
 msgserver(server_host, server_port, message)
+time.sleep(1)
+print('Stage 2: starting UDP Server')
+usHost = '127.0.0.1'
+usPort = 7777
+udpServer(usHost, usPort)
+while True:
+    input = raw_input('Messaggio: ')
+    print 'ok: ' + input + '\n'
+    if input.split()[0] == '!help':
+        print asciiart.comando_help
+    if input.split()[0] == '!quit':
+        sys.exit('Quitting...Bye Bye')

@@ -47,13 +47,32 @@ def clientthread(conn):
 def adduser(cNick, cHost, cPort):
     for x, data in enumerate(user_table):
         if data[0] == cNick:
-            #del user_table[x]
             print('ERROR: User already registered...checking if still alive')
-            ## inserire codice per verificare se online
-            ## se online ritorna error altrimenti cancella e aggiunge utente
-            return 'ERROR'
+
+            check = check_user_online(data[1], int(data[2]))
+
+            if check == 'USER_OFFLINE':
+                print('USER Offline, deleting and registering new data')
+                del user_table[x]
+            else:
+                print('USER Online and registered with the server')
+                return 'ERROR'
     user_table.append([cNick, cHost, cPort])
     return 'ADDED USER'
+
+
+def check_user_online(UDP_IP, UDP_PORT):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.sendto('PING?PONG', (UDP_IP, UDP_PORT))
+        data, addr = sock.recvfrom(1024)
+        print "received message:", data
+        if data == 'PONG?PING':
+            sock.close()
+            return 'USER_ONLINE'
+    except:
+        sock.close()
+        return 'USER_OFFLINE'
 
 
 while 1:
