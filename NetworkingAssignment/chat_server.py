@@ -4,35 +4,57 @@ from thread import *
 import asciiart
 
 
-#HOST = str(sys.argv[1])
-#PORT = str(sys.argv[2])
-HOST = '127.0.0.1'
-PORT = 8888
-debug = 0
+debug = 1
 
+
+def error_message(msg):
+    return asciiart.fg.RED + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
+
+
+def info_message(msg):
+    return asciiart.fg.YELLOW + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
+
+
+def infob_message(msg):
+    return asciiart.fg.GREEN + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
+
+
+# CHECK IF ARGS ARE CORRECTLY SPECIFIED. OTHERWISE PRINT ERROR AND REVERSE TO THE DEFAULT ONE
+if len(sys.argv) == 2:
+    HOST = str(sys.argv[1])
+    PORT = str(sys.argv[2])
+else:
+    print error_message('No args specified or less/over the min/max')
+    print infob_message('Command line: python chat_server.py <host> <port>')
+    print error_message('Falling back to default value: HOST 127.0.0.1 PORT 8888\n')
+    HOST = '127.0.0.1'
+    PORT = 8888
+
+# USER TABLE INITIALIZATION WITH COLUMN HEADER
 user_table = [['NiCkNaMe', 'IP', 'PORT']]
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-if debug == 1: print 'DEBUG: Socket created'
+print info_message('DEBUG: Socket created') if debug == 1 else ''
 
 try:
     s.bind((HOST, PORT))
 except socket.error, msg:
-    print 'DEBUG: Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+    print info_message('DEBUG: Bind failed. Error Code : ') + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
 
-if debug == 1: print 'DEBUG: Socket bind complete'
+print info_message('DEBUG: Socket bind complete') if debug == 1 else ''
 
 # Start listening on socket
 s.listen(100)
-if debug == 1: print 'DEBUG: Socket now listening'
+print info_message('DEBUG: Socket now listening') if debug == 1 else ''
+# PRINTING THE WELCOME INFORMATION
 print asciiart.comando_welcome_server
+print infob_message('.:-[ SERVER READY ]-:.')
+print info_message('--> Waiting connection... <--')
 
-print asciiart.fg.GREEN + asciiart.style.BRIGHT + '.:-[ SERVER READY ]-:.' + asciiart.fg.RESET + asciiart.style.RESET_ALL
-print asciiart.fg.BLUE + '--> Waiting connection... <--'
 
-
-def clientthread(conn):
+def client_thread(conn):
+    # SUPPORT FUNCTION FOR PRINTING TO SCREEN THE USERS REGISTERED ON SERVER
     def show_users():
         for i, d in enumerate(user_table):
             line = '|'.join(str(x).ljust(22) for x in d)
@@ -42,51 +64,47 @@ def clientthread(conn):
 
     data = conn.recv(1024)
 
-    if data.split('|')[0] == 'REGISTER':
-        # msg format: REGISTER|USER|IP|PORT
-        print data
+    if data.split('|')[0] == 'REGISTER':  # USER REGISTRATION
+        # msg format: REGISTER|<userNick>|<userIP>|<userPORT>
+        print data if debug == 1 else ''
         client_request = data.split('|')
-        # result = adduser(data.split('|')[1], data.split('|')[2], data.split('|')[3])
         result = adduser(client_request[1], client_request[2], client_request[3])
         if result == 'ADDED USER':
-            conn.send('OK')
+            conn.send('OK')  # IF ALL OK, SEND BACK THE 'OK' TO THE CLIENT
         if result == 'ERROR':
-            conn.send('Nickname already present')
+            conn.send('Nickname already present')  # PREVENT USER TO REGISTER WITH SOMEONE OTHER NICK STILL ALIVE
         conn.close()
         show_users()
 
-    if data.split('|')[0] == 'DEREGISTER':
-        # msg format: DEREGISTER|USER
-        print data
+    if data.split('|')[0] == 'DEREGISTER':  # DELETE USER REGISTRATION FROM SERVER
+        # msg format: DEREGISTER|<userNick>
+        print data if debug == 1 else ''
         client_request = data.split('|')
-#        for x, users in enumerate(user_table):
-#            if users[0] == client_request[1]:
-#                del user_table[x]
         if del_user(client_request[1]) == 'OK':
             print client_request[1] + ' User DeRegistered Successfully'
             show_users()
 
     if data.split('|')[0] == 'SEARCH':
-        # msg format: SEARCH|USER
-        print data
+        # msg format: SEARCH|<userNick>
+        print data if debug == 1 else ''
         client_response = ''
         client_request = data.split('|')
         for x, users in enumerate(user_table):
             if users[0] == client_request[1]:
-                if check_user_online(users[1], int(users[2])) == 'USER_ONLINE':
+                if check_user_online(users[1], int(users[2])) == 'USER_ONLINE':  # FIRST CHECK IF USER IS STILL ONLINE
                     client_response = ('USERINFO|' + users[1] + '|' + users[2])
                     break
                 else:
-                    del_user(client_request[1])
+                    del_user(client_request[1])  # OTHERWISE DELETE USER FROM THE SYSTEM
                     client_response = 'ERROR'
                     break
-        if client_response == '':
+        if client_response == '':  # FALL BACK FOR ANY OTHER GENERAL ERROR MAY OCCUR
             client_response = 'ERROR'
         conn.sendall(client_response)
 
-    if data.split('|')[0] == 'USERS':
+    if data.split('|')[0] == 'USERS':  # GENERATE USERS LIST FOR THE CLIENT
         # msg format: USERS|
-        print data
+        print data if debug == 1 else ''
         client_response = ''
         for i, d in enumerate([i[0] for i in user_table]):
             if i == 0:
@@ -103,15 +121,15 @@ def clientthread(conn):
 def adduser(cNick, cHost, cPort):
     for x, data in enumerate(user_table):
         if data[0] == cNick:
-            print('ERROR: User already registered...checking if still alive')
+            print('REGISTER ERROR: User ' + cNick + ' already registered...checking if still alive')
 
             check = check_user_online(data[1], int(data[2]))
 
             if check == 'USER_OFFLINE':
-                print('USER Offline, deleting and registering new data')
+                print('USER ' + cNick + ' Offline, deleting and registering new data')
                 del user_table[x]
             else:
-                print('USER Online and registered with the server')
+                print('USER ' + cNick + ' Online and registered with the server')
                 return 'ERROR'
     user_table.append([cNick, cHost, cPort])
     return 'ADDED USER'
@@ -122,7 +140,7 @@ def check_user_online(UDP_IP, UDP_PORT):
     try:
         sock.sendto('PING?PONG', (UDP_IP, UDP_PORT))
         data, addr = sock.recvfrom(1024)
-        print "received message:", data
+        print "received message:", data if debug == 1 else ''
         if data == 'PONG?PING':
             sock.close()
             return 'USER_ONLINE'
@@ -139,7 +157,7 @@ def del_user(user):
 
 while 1:
     conn, addr = s.accept()
-    print 'Connected with ' + addr[0] + ':' + str(addr[1])
-    start_new_thread(clientthread, (conn,))
+    print 'NEW connection with ' + addr[0] + ':' + str(addr[1])
+    start_new_thread(client_thread, (conn,))
 
 s.close()
