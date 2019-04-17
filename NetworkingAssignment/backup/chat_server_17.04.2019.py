@@ -3,17 +3,15 @@ import sys
 from thread import *
 import asciiart
 
-
 #HOST = str(sys.argv[1])
 #PORT = str(sys.argv[2])
 HOST = '127.0.0.1'
 PORT = 8888
-debug = 0
 
 user_table = [['NiCkNaMe', 'IP', 'PORT']]
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-if debug == 1: print 'DEBUG: Socket created'
+print 'DEBUG: Socket created'
 
 try:
     s.bind((HOST, PORT))
@@ -21,15 +19,11 @@ except socket.error, msg:
     print 'DEBUG: Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
 
-if debug == 1: print 'DEBUG: Socket bind complete'
+print 'DEBUG: Socket bind complete'
 
 # Start listening on socket
 s.listen(100)
-if debug == 1: print 'DEBUG: Socket now listening'
-print asciiart.comando_welcome_server
-
-print asciiart.fg.GREEN + asciiart.style.BRIGHT + '.:-[ SERVER READY ]-:.' + asciiart.fg.RESET + asciiart.style.RESET_ALL
-print asciiart.fg.BLUE + '--> Waiting connection... <--'
+print 'DEBUG: Socket now listening'
 
 
 def clientthread(conn):

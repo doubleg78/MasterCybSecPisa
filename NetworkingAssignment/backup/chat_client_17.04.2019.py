@@ -1,9 +1,9 @@
 import socket
+import sys
 import time
 import threading
 import asciiart
-import sys
-
+import codecs
 
 debug = 0
 
@@ -101,14 +101,7 @@ def udpClient(target_IP, target_PORT, target_Message):
     global command_msg
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(target_Message, (target_IP, target_PORT))
-    try:
-        data, addr = sock.recvfrom(1024)
-    except:
-        if target_Message.split('|')[0] == 'MSG':
-            print "Can't send message. User offline now? Try disconnect and reconnect."
-            return
-        if target_Message.split('|')[0] == 'END_CHAT':
-            data = 'END_OK'
+    data, addr = sock.recvfrom(1024)
     if target_Message.split('|')[0] == 'START_CHAT' and data == 'CHAT_OK':
         sys.stdout.write("\nUDPCLIENT received message:" + data + '\n')
         onchat = target_Message.split('|')[2]
@@ -155,13 +148,11 @@ t1 = threading.Thread(target=udpServer, args=(usHost, usPort))
 t1.setDaemon(True)
 t1.start()
 
-print asciiart.fg.GREEN + asciiart.style.BRIGHT + 'Client Ready!' + asciiart.fg.RESET + asciiart.style.RESET_ALL
-
 onchat = False
 onchat_ip = ''
 onchat_port = 0
 command_list = ['!help', '!connect', '!disconnect', '!show', '!quit']
-command_msg = '[Command: #] '
+command_msg = '[Command: #]'
 
 while True:
     time.sleep(0.05)
@@ -211,14 +202,9 @@ while True:
 
         if input.split()[0].lower() == '!quit':
             print asciiart.fg.BLUE + asciiart.style.BRIGHT + 'DEREGISTERING NickName from Server'
-            # message = 'DEREGISTER|<userNick>'
+            # message = 'DEREGISTER|' + sys.argv[1]
             message = 'DEREGISTER|' + usNick
             msgserver(server_host, server_port, message)
-            if onchat != False:
-                t2 = threading.Thread(target=udpClient, args=(onchat_ip, onchat_port, 'END_CHAT|' + usNick + '|' + onchat))
-                t2.setDaemon(True)
-                t2.start()
-                t2.join(1)
             sys.exit('Quitting...Bye Bye')
 
         if input.split()[0][0] == '!' and input.split()[0].lower() not in command_list:
