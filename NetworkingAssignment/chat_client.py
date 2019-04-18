@@ -7,7 +7,7 @@ import sys
 
 debug = 0
 
-
+#  Color shortcut for printing in various Color
 def error_message(msg):
     return asciiart.fg.RED + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
 
@@ -38,13 +38,13 @@ def msgserver(sHost, sPort, msg):
     except socket.error:
         sys.exit('Failed to create socket. Error code: ' + str(socket.error))
 
-    print infoC_message('MSGSERVER: Socket Created') if debug == 1 else ''
+    print infoC_message('MSGSERVER: Socket Created') if debug == 1 else '',
     try:
         s.connect((sHost, sPort))
     except:
         sys.exit('Server OFFLINE. Exiting')
 
-    print infoC_message('MSGSERVER: Socket Connected to server ' + sHost + ' on port ' + str(sPort)) if debug == 1 else ''
+    print infoC_message('MSGSERVER: Socket Connected to server ' + sHost + ' on port ' + str(sPort)) if debug == 1 else '\r',
 
     try:
         s.sendall(msg)
@@ -53,6 +53,7 @@ def msgserver(sHost, sPort, msg):
 
     time.sleep(80.0 / 1000.0)
     reply = s.recv(4096)
+
     #  REGISTERING NICK IP AND PORT TO SERVER AND CHECK IF NICKNAME IS ALREADY TAKEN
     if msg.split('|')[0] == 'REGISTER':
         if reply != 'OK':
@@ -60,7 +61,9 @@ def msgserver(sHost, sPort, msg):
                 sys.exit('Nickname already registered on server. Exiting.')
             sys.exit('Nickname already registered on server. Exiting.')
         else:
-            print infoG_message('Registered successfully with the server')
+            # print infoG_message('Registered successfully with the server')
+            print infoB_message(asciiart.messaggio_registration_ok)
+
     #  SEARCH IP AND PORT OF AN USER TO CHAT WITH
     if msg.split('|')[0] == 'SEARCH':
         if reply == 'ERROR':
@@ -70,6 +73,7 @@ def msgserver(sHost, sPort, msg):
             user_info = reply.split('|')
             print infoG_message('USER found. IP ' + user_info[1] + ' Port ' + user_info[2])
             return user_info
+
     #  REQUEST LIST OF USERS FROM SERVER
     if msg.split('|')[0] == 'USERS':
         print(reply)
@@ -194,10 +198,10 @@ else:
     usHost = '127.0.0.1'
     usPort = 7777
 
-print infoB_message(asciiart.comando_welcome)
+print infoB_message(asciiart.messaggio_welcome)
 print infoY_message('Stage 1: Registering with the Server')
-
-message = 'REGISTER|' + usNick + '|' + usHost + '|' + str(usPort)
+#  Send registration message to the server. Format: REGISTER|<userNick>|<userHost>|<userPort>
+message = '|'.join(['REGISTER', usNick, usHost, str(usPort)])
 msgserver(server_host, server_port, message)
 time.sleep(300.0 / 1000.0)
 
@@ -206,7 +210,8 @@ t1 = threading.Thread(target=udpServer, args=(usHost, usPort))
 t1.setDaemon(True)
 t1.start()
 
-print infoG_message('Client Ready!')
+# print infoG_message('Client Ready!')
+print infoB_message(asciiart.messaggio_client_ready)
 
 onchat = False
 onchat_ip = ''

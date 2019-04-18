@@ -43,7 +43,7 @@ comando_help = """
 \033[1m\033[34m            +----------------------------------------------+ """
 
 
-comando_welcome = """
+messaggio_welcome = """
 
   _______   _______       _______                                         __              __   
  |   _   | |   _   |     |   _   | .--.--. .-----. .-----. .----. .----. |  |--. .---.-. |  |_ 
@@ -57,7 +57,7 @@ comando_welcome = """
 """
 
 
-comando_welcome_server = fg.BLUE + style.BRIGHT + """
+messaggio_welcome_server = fg.BLUE + style.BRIGHT + """
                           )                
  (      (          (   ( /(  (      *   )  
  )\ )   )\ )       )\  )\()) )\   ` )  /(  
@@ -77,6 +77,33 @@ comando_welcome_server = fg.BLUE + style.BRIGHT + """
 |___/  |___| |_|_\    \_/    |___| |_|_\   
                                            
 """ + fg.RESET + style.RESET_ALL
+
+
+messaggio_registration_ok = """
+    +---------------------------+
+    |  \033[1m\033[33mRegistered successfully\033[34m\033[1m  |
+    |      \033[1m\033[33mwith the server\033[34m\033[1m      |
+    +---------------------------+
+"""
+
+
+messaggio_client_ready = """
+        \\\\\\///
+        / _  _\\
+      (| (.)(.)|)
+.---.OOOo--()--oOOO.---.
+|                      |
+|     \033[1m\033[33mClient Ready\033[34m\033[1m     |
+|      CHAT IT UP      |
+|                      |
+'---.oooO--------------'
+     (   )   Oooo.
+      \ (    (   )
+       \_)    ) /
+             (_/
+"""
+
+
 
 comando_help2 = '\n' \
                 '+------------------------------------------+\r\n' \

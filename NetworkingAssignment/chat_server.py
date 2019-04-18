@@ -48,7 +48,7 @@ print info_message('DEBUG: Socket bind complete') if debug == 1 else ''
 s.listen(100)
 print info_message('DEBUG: Socket now listening') if debug == 1 else ''
 # PRINTING THE WELCOME INFORMATION
-print asciiart.comando_welcome_server
+print asciiart.messaggio_welcome_server
 print infob_message('.:-[ SERVER READY ]-:.')
 print info_message('--> Waiting connection... <--')
 
