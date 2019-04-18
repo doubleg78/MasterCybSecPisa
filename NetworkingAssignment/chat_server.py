@@ -4,7 +4,7 @@ from thread import *
 import asciiart
 
 
-debug = 1
+debug = 0
 
 
 def error_message(msg):

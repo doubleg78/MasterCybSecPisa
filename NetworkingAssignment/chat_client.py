@@ -5,7 +5,7 @@ import asciiart
 import sys
 
 
-debug = 1
+debug = 0
 
 
 def error_message(msg):
@@ -36,7 +36,7 @@ def msgserver(sHost, sPort, msg):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error:
-        sys.exit('Failed to create socket. Error code: ' + str(msg[0])) # + ' , Error message : ' + msg[1])
+        sys.exit('Failed to create socket. Error code: ' + str(socket.error))
 
     print infoC_message('MSGSERVER: Socket Created') if debug == 1 else ''
     try:
@@ -53,7 +53,7 @@ def msgserver(sHost, sPort, msg):
 
     time.sleep(80.0 / 1000.0)
     reply = s.recv(4096)
-
+    #  REGISTERING NICK IP AND PORT TO SERVER AND CHECK IF NICKNAME IS ALREADY TAKEN
     if msg.split('|')[0] == 'REGISTER':
         if reply != 'OK':
             if reply == 'Nickname already present':
@@ -61,7 +61,7 @@ def msgserver(sHost, sPort, msg):
             sys.exit('Nickname already registered on server. Exiting.')
         else:
             print infoG_message('Registered successfully with the server')
-
+    #  SEARCH IP AND PORT OF AN USER TO CHAT WITH
     if msg.split('|')[0] == 'SEARCH':
         if reply == 'ERROR':
             print error_message('USER Not found. Probably offline??')
@@ -70,7 +70,7 @@ def msgserver(sHost, sPort, msg):
             user_info = reply.split('|')
             print infoG_message('USER found. IP ' + user_info[1] + ' Port ' + user_info[2])
             return user_info
-
+    #  REQUEST LIST OF USERS FROM SERVER
     if msg.split('|')[0] == 'USERS':
         print(reply)
 
