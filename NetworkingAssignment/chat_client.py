@@ -179,18 +179,23 @@ def udpClient(target_IP, target_PORT, target_Message):
 server_host = '127.0.0.1'
 server_port = 8888
 
-print infoB_message(asciiart.comando_welcome)
-print infoY_message('Stage 1: Registering with the Server')
 time.sleep(300.0 / 1000.0)
-if len(sys.argv) == 4:
+if len(sys.argv) >= 4:
     usNick = sys.argv[1]
     usHost = sys.argv[2]
     usPort = int(sys.argv[3])
+    if (len(sys.argv) == 5) and (sys.argv[4] == '--debug'): debug = 1
 else:
-    #sys.exit('Not Enough parameter. Start program with python <program.py> <NickName> <ip-address> <port>')
+    # sys.exit('Not Enough parameter. Start program with python <program.py> <NickName> <ip-address> <port>')
+    print error_message('Not enough parameters.')
+    print infoY_message('Usage: chat_client.py nickname your_ip_address your_ip_port [--debug]')
+    print infoB_message('Falling back anyway to default: Nickname=doubleG IP=127.0.0.1 PORT=7777')
     usNick = 'doubleG'
     usHost = '127.0.0.1'
     usPort = 7777
+
+print infoB_message(asciiart.comando_welcome)
+print infoY_message('Stage 1: Registering with the Server')
 
 message = 'REGISTER|' + usNick + '|' + usHost + '|' + str(usPort)
 msgserver(server_host, server_port, message)
