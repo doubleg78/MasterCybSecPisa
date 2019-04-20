@@ -35,7 +35,8 @@ comando_help = """
 \033[1m\033[34m            | \033[1m\033[33mCOMANDI DISPONIBILI                          \033[1m\033[34m| 
 \033[1m\033[34m            | \033[1m\033[33m                                             \033[1m\033[34m| 
 \033[1m\033[34m            | \033[1m\033[33m!help - visualizza i comandi disponibili     \033[1m\033[34m|
-\033[1m\033[34m            | \033[1m\033[33m!show - visualizza gli utenti connessi       \033[1m\033[34m|              
+\033[1m\033[34m            | \033[1m\033[33m!show - visualizza gli utenti connessi       \033[1m\033[34m|
+\033[1m\033[34m            | \033[1m\033[33m!whoami - visualizza il proprio nickname     \033[1m\033[34m|              
 \033[1m\033[34m            | \033[1m\033[33m!connect <nickname> - inizia una chat        \033[1m\033[34m| 
 \033[1m\033[34m            | \033[1m\033[33m!disconnect - chiudi la chat in corso        \033[1m\033[34m| 
 \033[1m\033[34m            | \033[1m\033[33m!quit - esci dal programma                   \033[1m\033[34m| 
