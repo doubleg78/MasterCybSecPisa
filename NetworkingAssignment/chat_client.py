@@ -4,10 +4,9 @@ import threading
 import asciiart
 import sys
 
-
 debug = 0
 
-#  Color shortcut for printing in various Color
+#  Color def shortcut for printing in various Color
 def error_message(msg):
     return asciiart.fg.RED + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
 
@@ -31,7 +30,7 @@ def infoW_message(msg):
 def infoB_message(msg):
     return asciiart.fg.BLUE + asciiart.style.BRIGHT + msg + asciiart.fg.RESET + asciiart.style.RESET_ALL
 
-
+# TCP client for talking with the Server
 def msgserver(sHost, sPort, msg):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -55,16 +54,17 @@ def msgserver(sHost, sPort, msg):
     reply = s.recv(4096)
 
     #  REGISTERING NICK IP AND PORT TO SERVER AND CHECK IF NICKNAME IS ALREADY TAKEN
+    #  msg format: REGISTER|<userNick>|<userIP>|<userPORT>
     if msg.split('|')[0] == 'REGISTER':
         if reply != 'OK':
             if reply == 'Nickname already present':
                 sys.exit('Nickname already registered on server. Exiting.')
             sys.exit('Nickname already registered on server. Exiting.')
         else:
-            # print infoG_message('Registered successfully with the server')
             print infoB_message(asciiart.messaggio_registration_ok)
 
     #  SEARCH IP AND PORT OF AN USER TO CHAT WITH
+    #  msg format: SEARCH|<userNick>
     if msg.split('|')[0] == 'SEARCH':
         if reply == 'ERROR':
             print error_message('USER Not found. Probably offline??')
@@ -94,17 +94,17 @@ def udpServer(usHost, usPort):
             sys.stdout.write(error_message('ERRORE RICEZIONE DATI'))
             sys.stdout.write('\r'+command_msg)
             return
-
+        # Server wants to know if we are still alive
         if data == 'PING?PONG':
             sock.sendto('PONG?PING', (addr[0], addr[1]))
 
         # MESSAGE START_CHAT|<usernick>|<remotenick>|<userIP>|<userPORT>
         if data.split('|')[0] == 'START_CHAT' and not onchat:
-            sock.sendto('CHAT_OK', (addr[0], addr[1]))
-            onchat = data.split('|')[1]
-            onchat_ip = data.split('|')[3]
-            onchat_port = int(data.split('|')[4])
-            command_msg = infoG_message('[' + usNick + ' #]: ')
+            sock.sendto('CHAT_OK', (addr[0], addr[1]))  # if we are not already in chat, accept the request
+            onchat = data.split('|')[1]  # saving the user we are chatting with
+            onchat_ip = data.split('|')[3]  # saving the user ip we are chatting with
+            onchat_port = int(data.split('|')[4])  # saving the user port with are chatting with
+            command_msg = infoG_message('[' + usNick + ' #]: ')  # change the prompt message
             sys.stdout.write("\r")
             sys.stdout.flush()
             sys.stdout.write(infoG_message('Received message: ' + data + '\n'))
@@ -180,6 +180,7 @@ def udpClient(target_IP, target_PORT, target_Message):
     #sock.close()
 
 
+# Set default server host and port
 server_host = '127.0.0.1'
 server_port = 8888
 
@@ -190,7 +191,6 @@ if len(sys.argv) >= 4:
     usPort = int(sys.argv[3])
     if (len(sys.argv) == 5) and (sys.argv[4] == '--debug'): debug = 1
 else:
-    # sys.exit('Not Enough parameter. Start program with python <program.py> <NickName> <ip-address> <port>')
     print error_message('Not enough parameters.')
     print infoY_message('Usage: chat_client.py nickname your_ip_address your_ip_port [--debug]')
     print infoB_message('Falling back anyway to default: Nickname=doubleG IP=127.0.0.1 PORT=7777')
@@ -210,13 +210,12 @@ t1 = threading.Thread(target=udpServer, args=(usHost, usPort))
 t1.setDaemon(True)
 t1.start()
 
-# print infoG_message('Client Ready!')
 print infoB_message(asciiart.messaggio_client_ready)
 
 onchat = False
 onchat_ip = ''
 onchat_port = 0
-command_list = ['!help', '!connect', '!disconnect', '!show', '!quit']
+command_list = ['!help', '!connect', '!disconnect', '!show', '!quit', '!whoami']
 command_msg = '[Command: #] '
 
 while True:
@@ -234,23 +233,25 @@ while True:
                 if len(uInput) <= 1:
                     print error_message('You must specify a user to connect.')
                 else:
-                    print infoY_message('Starting Chat with ' + uInput[1])
-                    try:
-                        info_utente = msgserver(server_host, server_port, 'SEARCH|' + uInput[1])
-                        if info_utente != False:
-                            print infoY_message('Connecting with the user...')
-                            #MESSAGE START_CHAT|<usernick>|<remotenick>|<userIP>|<userPORT>
-                            mess = ''.join(['START_CHAT', '|', usNick, '|', uInput[1], '|', usHost, '|', str(usPort)])
-                            t2 = threading.Thread(target=udpClient, args=(info_utente[1], int(info_utente[2]), mess))
-                            t2.setDaemon(True)
-                            t2.start()
-                    except:
-                        print error_message("Can't open a chat with this user")
+                    if uInput[1] == usNick:
+                        print error_message("You can't chat with yourself.\r\nEcho Server not implemented yet.\r\n")
+                    else:
+                        print infoY_message('Starting Chat with ' + uInput[1])
+                        try:
+                            info_utente = msgserver(server_host, server_port, 'SEARCH|' + uInput[1])
+                            if info_utente != False:
+                                print infoY_message('Connecting with the user...')
+                                #MESSAGE START_CHAT|<usernick>|<remotenick>|<userIP>|<userPORT>
+                                mess = ''.join(['START_CHAT', '|', usNick, '|', uInput[1], '|', usHost, '|', str(usPort)])
+                                t2 = threading.Thread(target=udpClient, args=(info_utente[1], int(info_utente[2]), mess))
+                                t2.setDaemon(True)
+                                t2.start()
+                        except:
+                            print error_message("Can't open a chat with this user")
 
         if uInput[0].lower() == '!disconnect':
             print infoG_message('Disconnecting current chat...')
             if onchat:
-                #t2 = threading.Thread(target=udpClient, args=(info_utente[1], int(info_utente[2]), 'END_CHAT|' + usNick + '|' + onchat))
                 t2 = threading.Thread(target=udpClient, args=(onchat_ip, onchat_port, 'END_CHAT|' + usNick + '|' + onchat))
                 t2.setDaemon(True)
                 t2.start()
@@ -263,6 +264,9 @@ while True:
                 users_list = msgserver(server_host, server_port, 'USERS|')
             except:
                 print error_message('ERROR: server offline?!')
+
+        if uInput[0].lower() == '!whoami':
+            print infoY_message('Hey dude, forgot who you are?\r\nYour nickname is ') + infoG_message(usNick)
 
         if uInput[0].lower() == '!quit':
             print infoG_message('DEREGISTERING NickName from Server')
@@ -282,6 +286,8 @@ while True:
         if uInput[0][0] != '!' and onchat != False:
             #FORMAT: MSG|<usernick>|<remotenick>|<message to send>
             chat_mess = ''.join(['MSG', '|', usNick, '|', onchat, '|', ' '.join(uInput)])
+            if sys.stdin.encoding == 'cp850':
+                chat_mess = chat_mess.decode('cp850').encode('utf-8')
             t2 = threading.Thread(target=udpClient, args=(onchat_ip, onchat_port, chat_mess))
             t2.setDaemon(True)
             t2.start()
