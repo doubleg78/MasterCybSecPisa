@@ -25,7 +25,7 @@ if len(sys.argv) == 2:
     PORT = str(sys.argv[2])
 else:
     print error_message('No args specified or less/over the min/max')
-    print infob_message('Command line: python chat_server.py <host> <port>')
+    print infob_message('Usage: chat_server.py <host> <port>')
     print error_message('Falling back to default value: HOST 127.0.0.1 PORT 8888\n')
     HOST = '127.0.0.1'
     PORT = 8888
