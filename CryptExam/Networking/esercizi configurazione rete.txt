@@ -1,0 +1,53 @@
+Esercizi configurazione di rete
+===============
+
+ 1) Visualizzare la configurazione delle interfacce di rete
+ 2) Visualizzare solo la configurazione di eth0
+    - Che indirizzo IP e che maschera sono impostate?
+    - Che indirizzo MAC ha la scheda di rete?
+    - Cos'e' l'MTU e quanto vale?
+ 3) Impostare come indirizzo IP dell'interfaccia eth0 l'indirizzo 10.0.2.15, maschera 255.255.255.0 
+ 4) Abilitare l'interfaccia di rete 
+ 5) Visualizzare la tabella di routing
+    - Qual e' il default gateway?
+ 6) Impostare come default gateway l'host 10.0.2.2
+ 7) Visualizzare la rotta usata per raggiungere 192.168.0.27
+ 8) Visualizzare l'indirizzo del server DNS in uso
+ 9) Cambiare l'indirizzo del server DNS in 8.8.8.8
+10) Scoprire l'indirizzo IP di lmgtfy.com
+11) Rimuovere l'indirizzo IP di eth0 tramite ip
+12) Disattivare eth0
+13) Fate una copia di backup del file interfaces (es. interfaces.bak)
+14) Impostare l'indirizzo 10.0.2.15, la maschera 255.255.255.0, e
+    accendere la scheda usando ifup e il file interfaces
+    (Cancellare le impostazioni di eth0 gia' presenti)
+14) Aggiungete al file la sezione per impostare la scheda all'avvio
+
+Soluzione
+=========
+ 1) $ ip addr show
+ 2) $ ip addr show eth0
+ 3) # ip addr add 10.0.2.15/24 broadcast 10.0.2.255 dev eth0
+ 4) # ip link set eth0 up
+ 5) $ ip route show
+ 6) # ip route add default via 10.0.2.2
+ 7) $ ip route get 192.168.0.27
+ 8) $ cat /etc/resolv.conf
+ 9) # echo "nameserver 8.8.8.8" > /etc/resolv.conf 
+(il comando precedente da errore se lanciato con il sudo, 
+bisogna prima lanciare sudo -s per diventare sudo e poi 
+lanciare il comando)
+10) $ nslookup lmgtfy.com
+11) # ip addr flush eth0
+12) # ip link set eth0 down
+13) # cp /etc/network/interfaces /etc/network/interfaces.bak
+14) # nano /etc/network/interfaces
+    
+    iface eth0 inet static
+        address 10.0.2.15
+        netmask 255.255.255.0
+	gateway 10.0.2.2
+    # ifup eth0
+15) # nano /etc/network/interfaces
+
+    auto eth0
